@@ -1,5 +1,65 @@
 # API-_-IRCTC
+#This API is designed to manage a railway booking system. It includes features for Admins to manage trains and for Users to view train details, check seat availability, and book seats.
+
+#Features:
+#Role-Based Access
+#Admin: Add, update, and delete train details.
+# Modify seat availability.
+# User: Register and log in.
+# Search for trains between stations.
+
+#Tech Stack:
+#Backend: Flask: A lightweight Python web framework, ideal for RESTful API development.
+# Flask-JWT-Extended: Manages user authentication and role-based access control.
+#Database MySQL: Relational database for structured data like trains, users, and bookings.
+
+#Setup:Python Environment: Install Python 3.9 or above. Create a virtual environment to isolate the project dependencies:
+python3 -m venv env
+source env/bin/activate
+
+#Database Setup: Install MySQL
+CREATE DATABASE railway_system;
+USE railway_system;
+
+CREATE TABLE Users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    role ENUM('admin', 'user') NOT NULL
+);
+
+CREATE TABLE Trains (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    train_name VARCHAR(100) NOT NULL,
+    source VARCHAR(100) NOT NULL,
+    destination VARCHAR(100) NOT NULL,
+    total_seats INT NOT NULL,
+    departure_time DATETIME NOT NULL,
+    arrival_time DATETIME NOT NULL
+);
+
+CREATE TABLE Train_Seats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    train_id INT NOT NULL,
+    available_seats INT NOT NULL,
+    FOREIGN KEY (train_id) REFERENCES Trains(id) ON DELETE CASCADE
+);
+
+CREATE TABLE Bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    train_id INT NOT NULL,
+    booking_time DATETIME NOT NULL,
+    seat_count INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE,
+    FOREIGN KEY (train_id) REFERENCES Trains(id) ON DELETE CASCADE
+);
+
+
+#Installation of Libraries:
 pip install flask flask-mysql flask-jwt-extended flask-bcrypt
+
+#Main Code:
 
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -7,6 +67,7 @@ from flask_bcrypt import Bcrypt
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 
+#Configuration for performance of the task:
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -73,3 +134,6 @@ def book_seat():
         cursor.close()
 if __name__ == '__main__':
     app.run(debug=True)
+
+# Run:
+python app.py
